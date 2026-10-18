@@ -1,4 +1,4 @@
-# <div style="display: flex; flex-direction: row; align-items: center;" > <img alt="logo.png" width="50" height="50" src="app/static/img/logo.png"/> LightFiles </div>
+# <div style="display: flex; flex-direction: row; align-items: center; align-content: center;" > <img alt="logo.png" width="50" height="50" src="app/static/img/logo.png"/> LightFiles </div>
 
 Легкий self-hosted файлообменник: загрузил файл — получил ссылку — скинул кому надо. Без облаков, без логинов в чужих
 сервисах.
