@@ -12,6 +12,7 @@ from app.utils.create_admin_user import create_admin_user
 from app.models.auth_model import AuthModel
 from app.routers.logout_router import logout_router
 from app.routers.upload_router import upload_router
+from app.routers.download_router import download_router
 
 UPLOAD_DIR = Path("uploads/")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
@@ -64,6 +65,7 @@ def register_app_blueprints(app):
     app.register_blueprint(login_router, url_prefix=settings.PREFIX)
     app.register_blueprint(logout_router, url_prefix=settings.PREFIX)
     app.register_blueprint(upload_router, url_prefix=settings.PREFIX)
+    app.register_blueprint(download_router, url_prefix=settings.PREFIX)
 
 
 if __name__ == "__main__":

@@ -54,7 +54,7 @@
             <td>{{ file.format_size }}</td>
             <td>
                 <div class="btn-group" role="group" aria-label="Basic example">
-                    <a type="button" class="btn-solid theme-success">Скачать</a>
+                    <a href="{{ url_for("download.download_file", file_id=file.id) }}" type="button" class="btn-solid theme-success">Скачать</a>
                     {% if current_user.is_authenticated %}
                     <a href="{{ url_for("files.delete_file", file_id=file.id) }}" type="button" class="btn-solid theme-danger">Удалить</a>
                     {% endif %}
