@@ -31,3 +31,16 @@ class FileModel:
             file.id = self.id
 
         return file
+
+    @property
+    def format_size(self) -> str:
+        if self.size < 1024:
+            return f"{self.size} Б"
+
+        if self.size < 1024 * 1024:
+            return f"{self.size / 1024:.1f} КБ"
+
+        if self.size < 1024 * 1024 * 1024:
+            return f"{self.size / 1024 / 1024:.1f} MБ"
+
+        return f"{self.size / 1024 / 1024 / 1024:.1f} ГБ"

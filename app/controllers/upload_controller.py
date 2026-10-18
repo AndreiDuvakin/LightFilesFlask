@@ -92,7 +92,7 @@ class UploadController:
                         files_service = FilesService(db)
 
                         new_file = FileModel(
-                            filename=str(output_path),
+                            filename=str(filename),
                             uploaded_at=datetime.datetime.now(),
                             size=size,
                         )

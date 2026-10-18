@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_with_message.html" %}
 
 {% block title %}LightFiles - Загрузка файла{% endblock %}
 
@@ -30,97 +30,98 @@
 <script src="{{ url_for('static', filename='js/resumable.js') }}"></script>
 <script>
 
-const browseButton = document.getElementById("browse");
-const uploadButton = document.getElementById("upload");
-const pauseButton = document.getElementById("pause");
-const filenameElement = document.getElementById("filename");
-const progressElement = document.getElementById("progress");
-const statusElement = document.getElementById("status");
+    const browseButton = document.getElementById("browse");
+    const uploadButton = document.getElementById("upload");
+    const pauseButton = document.getElementById("pause");
+    const filenameElement = document.getElementById("filename");
+    const progressElement = document.getElementById("progress");
+    const statusElement = document.getElementById("status");
 
-const resumable = new Resumable({
-    target: "{{ url_for('files.files_page') }}api/upload",
-    testTarget: "{{ url_for('files.files_page') }}api/upload",
-    testChunks: true,
+    const resumable = new Resumable({
+        target: "{{ url_for('files.files_page') }}api/upload",
+        testTarget: "{{ url_for('files.files_page') }}api/upload",
+        testChunks: true,
 
-    chunkSize: 5 * 1024 * 1024,
-    forceChunkSize: true,
+        chunkSize: 5 * 1024 * 1024,
+        forceChunkSize: true,
 
-    simultaneousUploads: 2,
-    maxFiles: 1,
+        simultaneousUploads: 2,
+        maxFiles: 1,
 
-    maxChunkRetries: 3,
-    chunkRetryInterval: 2000,
+        maxChunkRetries: 3,
+        chunkRetryInterval: 2000,
 
-    method: "multipart",
-    fileParameterName: "file",
+        method: "multipart",
+        fileParameterName: "file",
 
-    permanentErrors: [400, 401, 403, 404, 413, 415, 501]
-});
+        permanentErrors: [400, 401, 403, 404, 413, 415, 501]
+    });
 
-if (!resumable.support) {
-    statusElement.textContent =
-        "Ваш браузер не поддерживает загрузку чанками.";
-} else {
-    resumable.assignBrowse(browseButton);
-}
-
-resumable.on("fileAdded", function(file) {
-    if (resumable.files.length > 1) {
-        resumable.removeFile(file);
-
-        statusElement.textContent = "Можно загрузить только один файл.";
-        return;
+    if (!resumable.support) {
+        statusElement.textContent =
+            "Ваш браузер не поддерживает загрузку чанками.";
+    } else {
+        resumable.assignBrowse(browseButton);
     }
 
-    filenameElement.textContent =
-        `${file.fileName} (${(file.size / 1024 / 1024).toFixed(2)} МБ)`;
+    resumable.on("fileAdded", function(file) {
+        if (resumable.files.length > 1) {
+            resumable.removeFile(file);
 
-    progressElement.style.width = "0%";
-    statusElement.textContent = "Файл готов к загрузке";
+            statusElement.textContent = "Можно загрузить только один файл.";
+            return;
+        }
 
-    uploadButton.disabled = false;
-    pauseButton.disabled = false;
-});
+        filenameElement.textContent =
+            `${file.fileName} (${(file.size / 1024 / 1024).toFixed(2)} МБ)`;
 
-uploadButton.addEventListener("click", function() {
-    resumable.upload();
-    statusElement.textContent = "Загрузка...";
-});
+        progressElement.style.width = "0%";
+        statusElement.textContent = "Файл готов к загрузке";
 
-pauseButton.addEventListener("click", function() {
-    if (resumable.isUploading()) {
-        resumable.pause();
-        statusElement.textContent = "Загрузка приостановлена";
-        pauseButton.textContent = "Продолжить";
-    } else {
+        uploadButton.disabled = false;
+        pauseButton.disabled = false;
+    });
+
+    uploadButton.addEventListener("click", function() {
         resumable.upload();
         statusElement.textContent = "Загрузка...";
-        pauseButton.textContent = "Пауза";
-    }
-});
+    });
 
-resumable.on("fileSuccess", function(file, message) {
-    progressElement.style.width = "100%";
-    statusElement.textContent = "Файл успешно загружен!";
-    uploadButton.disabled = true;
-    pauseButton.disabled = true;
-});
+    pauseButton.addEventListener("click", function() {
+        if (resumable.isUploading()) {
+            resumable.pause();
+            statusElement.textContent = "Загрузка приостановлена";
+            pauseButton.textContent = "Продолжить";
+        } else {
+            resumable.upload();
+            statusElement.textContent = "Загрузка...";
+            pauseButton.textContent = "Пауза";
+        }
+    });
 
-resumable.on("fileError", function(file, message) {
-    statusElement.textContent =
-        `Ошибка загрузки: ${message}`;
-});
+    resumable.on("fileSuccess", function(file, message) {
+        progressElement.style.width = "100%";
+        statusElement.textContent = "Файл успешно загружен!";
+        uploadButton.disabled = true;
+        pauseButton.disabled = true;
+    });
 
-resumable.on("fileProgress", function(file) {
-    const progress = file.progress() * 100;
+    resumable.on("fileError", function(file, message) {
+        statusElement.textContent =
+            `Ошибка загрузки: ${message}`;
+    });
 
-    progressElement.style.width = `${progress}%`;
-    statusElement.textContent =
-        `Загружено: ${progress.toFixed(1)}%`;
+    resumable.on("fileProgress", function(file) {
+        const progress = file.progress() * 100;
 
-    if (progress === 100) {
-        window.location.href = "{{ url_for('files.files_page') }}";
-    }
-});
+        uploadButton.disabled = true;
+        progressElement.style.width = `${progress}%`;
+        statusElement.textContent =
+            `Загружено: ${progress.toFixed(1)}%`;
+
+        if (progress === 100) {
+            window.location.href = "{{ url_for('files.files_page') }}";
+        }
+    });
 </script>
 {% endblock %}
