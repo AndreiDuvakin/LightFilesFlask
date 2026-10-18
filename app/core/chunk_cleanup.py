@@ -1,5 +1,5 @@
 import asyncio
-import datetime
+from datetime import datetime
 
 
 async def cleanup_old_chunks_once() -> int:
