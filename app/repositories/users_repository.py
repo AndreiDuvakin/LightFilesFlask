@@ -20,6 +20,11 @@ class UsersRepository:
         result = await self.db.execute(query)
         return result.scalars().first()
 
+    async def get_by_id(self, user_id: int) -> User | None:
+        query = select(User).filter_by(id=user_id)
+        result = await self.db.execute(query)
+        return result.scalars().first()
+
     async def create(self, user: User) -> User | None:
         self.db.add(user)
         await self.db.commit()

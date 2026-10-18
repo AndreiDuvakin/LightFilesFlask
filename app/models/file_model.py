@@ -10,7 +10,6 @@ class FileModel:
     uploaded_at: datetime.datetime
     size: int
     id: int | None = field(default=None)
-    upload_progress: float | None = field(default=None)
 
     @classmethod
     def from_entity(cls, file: File):
@@ -23,7 +22,9 @@ class FileModel:
 
     def to_entity(self):
         file = File(
-            filename=self.filename, uploaded_at=self.uploaded_at, size=self.size
+            filename=self.filename,
+            uploaded_at=self.uploaded_at,
+            size=self.size,
         )
 
         if self.id is not None:

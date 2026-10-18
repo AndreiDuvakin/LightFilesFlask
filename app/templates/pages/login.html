@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}LightFiles — Вход{% endblock %}
+
+{% block content %}
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-body-tertiary">
+    <div class="card shadow-sm" style="max-width: 420px; width: 100%;">
+        <div class="card-body p-4 p-md-5">
+
+            <div class="text-center mb-4">
+                <h1 class="h3 fw-semibold mb-1">Вход в LightFiles</h1>
+                <p class="text-body-secondary small mb-0">Введите логин и пароль</p>
+            </div>
+
+            {% if message %}
+            <div class="alert theme-danger py-2 small" role="alert">
+                {{ message }}
+            </div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    {{ form.username.label(class="form-label") }}
+                    {{ form.username(
+                    class="form-control form-control-lg" + (" is-invalid" if form.username.errors else ""),
+                    autofocus=true,
+                    ) }}
+                    {% for error in form.username.errors %}
+                    <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.password.label(class="form-label") }}
+                    {{ form.password(
+                    class="form-control form-control-lg" + (" is-invalid" if form.password.errors else ""),
+                    ) }}
+                    {% for error in form.password.errors %}
+                    <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-check mb-4">
+                    {{ form.remember_me(class="form-check-input") }}
+                    {{ form.remember_me.label(class="form-check-label") }}
+                </div>
+
+                <div class="d-grid gap-2">
+                    {{ form.submit(class="btn-solid theme-primary btn-lg") }}
+                    <a class="btn text-body-secondary" href="{{ url_for('files.files_page') }}">
+                        Назад
+                    </a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

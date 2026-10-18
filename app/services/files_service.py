@@ -21,17 +21,17 @@ class FilesService:
 
         return FileModel.from_entity(file)
 
-    async def create_list_files(
-        self,
-        files: List[FileModel],
-    ) -> List[FileModel]:
-        files_entities = [file.to_entity() for file in files]
+    async def create_file(
+            self,
+            file: FileModel,
+    ) -> FileModel:
+        file_entity = file.to_entity()
 
-        files_models = await self.files_repository.create_list_files(
-            files_entities,
+        file_model = await self.files_repository.create_file(
+            file_entity,
         )
 
-        return [FileModel.from_entity(file) for file in files_models]
+        return FileModel.from_entity(file_model)
 
     async def delete_file(self, file_id: int) -> FileModel | None:
         file_entity = await self.files_repository.get_file_by_id(file_id)

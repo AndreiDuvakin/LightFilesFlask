@@ -24,6 +24,14 @@ class UsersService:
 
         return UserModel.from_entity(user)
 
+    async def get_by_id(self, user_id: int) -> UserModel | None:
+        user = await self.users_repository.get_by_id(user_id)
+
+        if not user:
+            return None
+
+        return UserModel.from_entity(user)
+
     async def create_user(self, user: UserModel) -> UserModel | None:
         check_user = await self.users_repository.get_by_username(user.username)
 
@@ -40,11 +48,14 @@ class UsersService:
         return UserModel.from_entity(new_user)
 
     async def check_login(
-        self,
-        username: str,
-        password: str,
+            self,
+            username: str,
+            password: str,
     ) -> UserModel | None:
         user = await self.users_repository.get_by_username(username)
+
+        if not user:
+            return None
 
         if user.check_password(password):
             return UserModel.from_entity(user)

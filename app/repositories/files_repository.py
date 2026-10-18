@@ -20,14 +20,11 @@ class FilesRepository:
         result = await self.db.execute(query)
         return result.scalars().all()
 
-    async def create_list_files(self, files: List[File]) -> Sequence[File]:
-        self.db.add_all(files)
+    async def create_file(self, file: File) -> File:
+        self.db.add(file)
         await self.db.commit()
-
-        for file in files:
-            await self.db.refresh(file)
-
-        return files
+        await self.db.refresh(file)
+        return file
 
     async def delete_file(self, file: File) -> File:
         await self.db.delete(file)

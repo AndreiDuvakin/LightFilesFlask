@@ -9,3 +9,4 @@ class Base(DeclarativeBase):
 
 
 from app.db.entities.files import File  # noqa: E402
+from app.db.entities.users import User  # noqa: E402
