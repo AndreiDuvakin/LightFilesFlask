@@ -1,30 +1,30 @@
 import asyncio
 import datetime
 import math
-import re
 from pathlib import Path
+import re
 
 import aiofiles
 from quart import jsonify, redirect, url_for
 
 from app.core.settings import settings
 from app.db.session import get_db
-from app.services.files_service import FilesService
 from app.models.file_model import FileModel
+from app.services.files_service import FilesService
 
 merge_semaphore = asyncio.Semaphore(2)
 
 
 class UploadController:
     async def upload_chunk(
-            self,
-            identifier,
-            chunk_number,
-            total_chunks,
-            total_size,
-            chunk_size,
-            files,
-            filename,
+        self,
+        identifier,
+        chunk_number,
+        total_chunks,
+        total_size,
+        chunk_size,
+        files,
+        filename,
     ):
         from app.main import COMPLETED_DIR
 
@@ -37,13 +37,13 @@ class UploadController:
             nominal_chunk_size = int(chunk_size)
 
             if (
-                    number < 1
-                    or total < 1
-                    or number > total
-                    or size < 1
-                    or size > settings.MAX_CONTENT_LENGTH
-                    or nominal_chunk_size < 1
-                    or total != math.ceil(size / nominal_chunk_size)
+                number < 1
+                or total < 1
+                or number > total
+                or size < 1
+                or size > settings.MAX_CONTENT_LENGTH
+                or nominal_chunk_size < 1
+                or total != math.ceil(size / nominal_chunk_size)
             ):
                 raise ValueError
 
@@ -65,8 +65,7 @@ class UploadController:
 
         async with merge_semaphore:
             if all(
-                    (upload_dir / f"chunk_{i:08d}").is_file()
-                    for i in range(1, total + 1)
+                (upload_dir / f"chunk_{i:08d}").is_file() for i in range(1, total + 1)
             ):
                 output_path = COMPLETED_DIR / filename
 
@@ -99,17 +98,17 @@ class UploadController:
 
                         await files_service.create_file(new_file)
 
-                except Exception as e:
+                except Exception:
                     output_path.unlink(missing_ok=True)
 
         return redirect(
-            url_for('files.files_page'),
+            url_for("files.files_page"),
         )
 
     async def get_chunk_info(
-            self,
-            identifier,
-            chunk_number,
+        self,
+        identifier,
+        chunk_number,
     ):
         try:
             upload_dir = self.get_upload_dir(identifier)

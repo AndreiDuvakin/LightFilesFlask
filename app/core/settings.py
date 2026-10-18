@@ -10,7 +10,9 @@ class Settings(BaseSettings):
     APP_PORT: int = Field(alias="port", default=6767)
     DB_PATH: str = Field(alias="db", default="db.sqlite3")
     APP_HOST: str = Field(alias="host", default="localhost")
-    MAX_CONTENT_LENGTH: int = Field(alias="max-content-length", default=16 * 1024 * 1024 * 1024)
+    MAX_CONTENT_LENGTH: int = Field(
+        alias="max-content-length", default=16 * 1024 * 1024 * 1024
+    )
 
     class Config:
         env_file = ".env"

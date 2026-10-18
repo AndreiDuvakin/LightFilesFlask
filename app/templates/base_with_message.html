@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
+{% block head %}
 {% if message %}
-<div class="alert theme-danger py-2 small" role="alert">
+<div class="alert fade show theme-{% if not success %}danger{% else %}success{% endif %}"
+     role="alert">
     {{ message }}
+    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 {% endif %}
-
-{% block content %}
 {% endblock %}

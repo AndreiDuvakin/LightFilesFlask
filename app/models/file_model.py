@@ -44,3 +44,7 @@ class FileModel:
             return f"{self.size / 1024 / 1024:.1f} MБ"
 
         return f"{self.size / 1024 / 1024 / 1024:.1f} ГБ"
+
+    @property
+    def pretty_uploaded_at(self) -> str:
+        return self.uploaded_at.strftime("%d.%m.%Y %H:%M:%S")

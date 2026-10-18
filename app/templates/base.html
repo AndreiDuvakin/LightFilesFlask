@@ -8,8 +8,9 @@
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 </head>
 <body>
+{% block head %}
+{% endblock %}
 {% block content %}
-
 {% endblock %}
 <script type="module" src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 </body>

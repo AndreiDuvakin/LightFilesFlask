@@ -1,127 +1,151 @@
 {% extends "base_with_message.html" %}
 
-{% block title %}LightFiles - Загрузка файла{% endblock %}
+{% block title %}LightFiles — Загрузка файла{% endblock %}
 
 {% block content %}
-<div class="container m-4">
+<div class="container py-4" style="max-width: 720px;">
 
-    <h1>Загрузка файла</h1>
-    <div class="btn-group" role="group" aria-label="Basic example">
-
-        <button class="btn-solid theme-primary" id="browse">Выбрать файл</button>
-        <button class="btn-solid theme-accent" id="upload" disabled>Загрузить</button>
-        <button class="btn-solid theme-warning" id="pause" disabled>Пауза</button>
-        <a class="btn-solid theme-danger" href="{{ url_for('files.files_page') }}">
-            Назад
-        </a>
+    <div class="mb-4">
+        <h1 class="h3 mb-1">Загрузка файла</h1>
     </div>
 
-    <p id="filename">Файл не выбран</p>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <div id="dropzone"
+                 class="border border-2 border-dashed rounded-3 text-center py-5 px-3 mb-4 bg-body-tertiary">
+                <div class="mb-2" style="font-size: 2.5rem; line-height: 1;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-upload" viewBox="0 0 16 16">
+  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+  <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z"/>
+</svg>
+                </div>
+                <p class="mb-1 fw-semibold">Перетащите файл сюда</p>
+                <p class="text-body-secondary small mb-3">или выберите его на диске</p>
+                <button type="button" class="btn-solid theme-primary" id="browse">
+                    Выбрать файл
+                </button>
+            </div>
 
-    <div class="progress-container">
-        <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="0" aria-valuemin="0"
-             aria-valuemax="100">
-            <div id="progress" class="progress-bar" style="width: 0%"></div>
+            <div class="d-flex justify-content-between align-items-center mb-2 small">
+                <span class="text-body-secondary text-truncate" id="filename">Файл не выбран</span>
+                <span class="text-body-secondary text-nowrap" id="filesize"></span>
+            </div>
+
+            <div class="progress mb-3"
+                 role="progressbar"
+                 aria-label="Прогресс загрузки"
+                 aria-valuemin="0" aria-valuemax="100"
+                 style="height: 1.25rem;">
+                <div id="progress"
+                     class="progress-bar progress-bar-striped progress-bar-animated"
+                     style="width: 0%">
+                    <span id="progress-label" class="small fw-semibold"></span>
+                </div>
+            </div>
+
+            <p id="status" class="small text-body-secondary mb-4">Ожидание файла</p>
+
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn-solid theme-primary" id="upload" disabled>
+                    Загрузить
+                </button>
+                <a class="btn-outline theme-secondary" href="{{ url_for('files.files_page') }}">
+                    Назад
+                </a>
+            </div>
+
         </div>
     </div>
 
-    <p id="status">Ожидание файла</p>
 </div>
+
 <script src="{{ url_for('static', filename='js/resumable.js') }}"></script>
 <script>
+const browseButton   = document.getElementById("browse");
+const uploadButton   = document.getElementById("upload");
+const dropzone       = document.getElementById("dropzone");
+const filenameEl     = document.getElementById("filename");
+const filesizeEl     = document.getElementById("filesize");
+const progressEl     = document.getElementById("progress");
+const progressLabel  = document.getElementById("progress-label");
+const statusEl       = document.getElementById("status");
 
-    const browseButton = document.getElementById("browse");
-    const uploadButton = document.getElementById("upload");
-    const pauseButton = document.getElementById("pause");
-    const filenameElement = document.getElementById("filename");
-    const progressElement = document.getElementById("progress");
-    const statusElement = document.getElementById("status");
+function setStatus(text, tone = "secondary") {
+    statusEl.textContent = text;
+    statusEl.className = "small mb-4 text-" + tone;
+}
 
-    const resumable = new Resumable({
-        target: "{{ url_for('files.files_page') }}api/upload",
-        testTarget: "{{ url_for('files.files_page') }}api/upload",
-        testChunks: true,
+const resumable = new Resumable({
+    target: "{{ url_for('upload.upload_chunk') }}",
+    testTarget: "{{ url_for('upload.upload_chunk') }}",
+    testChunks: true,
+    chunkSize: 5 * 1024 * 1024,
+    forceChunkSize: true,
+    simultaneousUploads: 2,
+    maxFiles: 1,
+    maxChunkRetries: 3,
+    chunkRetryInterval: 2000,
+    method: "multipart",
+    fileParameterName: "file",
+    permanentErrors: [400, 401, 403, 404, 413, 415, 501],
+    headers: {
+        "X-CSRFToken": "{{ csrf_token() }}",
+    },
+});
 
-        chunkSize: 5 * 1024 * 1024,
-        forceChunkSize: true,
+if (!resumable.support) {
+    setStatus("Ваш браузер не поддерживает загрузку чанками.", "danger");
+    browseButton.disabled = true;
+} else {
+    resumable.assignBrowse(browseButton);
+    resumable.assignDrop(dropzone);
+}
 
-        simultaneousUploads: 2,
-        maxFiles: 1,
+dropzone.addEventListener("dragover", () => dropzone.classList.add("dragover"));
+dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+dropzone.addEventListener("drop", () => dropzone.classList.remove("dragover"));
 
-        maxChunkRetries: 3,
-        chunkRetryInterval: 2000,
+resumable.on("fileAdded", function(file) {
+    filenameEl.textContent = file.fileName;
+    filesizeEl.textContent = (file.size / 1024 / 1024).toFixed(2) + " МБ";
 
-        method: "multipart",
-        fileParameterName: "file",
+    progressEl.style.width = "0%";
+    progressEl.classList.add("progress-bar-striped", "progress-bar-animated");
+    progressLabel.textContent = "";
 
-        permanentErrors: [400, 401, 403, 404, 413, 415, 501]
-    });
+    setStatus("Файл готов к загрузке");
+    uploadButton.disabled = false;
+});
 
-    if (!resumable.support) {
-        statusElement.textContent =
-            "Ваш браузер не поддерживает загрузку чанками.";
-    } else {
-        resumable.assignBrowse(browseButton);
-    }
+uploadButton.addEventListener("click", function() {
+    resumable.upload();
+    setStatus("Загрузка...");
+    uploadButton.disabled = true;
+});
 
-    resumable.on("fileAdded", function(file) {
-        if (resumable.files.length > 1) {
-            resumable.removeFile(file);
+resumable.on("fileSuccess", function() {
+    progressEl.classList.remove("progress-bar-animated", "progress-bar-striped");
+    progressEl.style.width = "100%";
+    progressLabel.textContent = "100%";
 
-            statusElement.textContent = "Можно загрузить только один файл.";
-            return;
-        }
+    setStatus("Файл успешно загружен!", "success");
 
-        filenameElement.textContent =
-            `${file.fileName} (${(file.size / 1024 / 1024).toFixed(2)} МБ)`;
+    setTimeout(() => {
+        window.location.href = "{{ url_for('files.files_page') }}";
+    }, 800);
+});
 
-        progressElement.style.width = "0%";
-        statusElement.textContent = "Файл готов к загрузке";
+resumable.on("fileError", function(file, message) {
+    setStatus("Ошибка загрузки: " + message, "danger");
+    progressEl.classList.remove("progress-bar-animated");
+    uploadButton.disabled = false;
+});
 
-        uploadButton.disabled = false;
-        pauseButton.disabled = false;
-    });
-
-    uploadButton.addEventListener("click", function() {
-        resumable.upload();
-        statusElement.textContent = "Загрузка...";
-    });
-
-    pauseButton.addEventListener("click", function() {
-        if (resumable.isUploading()) {
-            resumable.pause();
-            statusElement.textContent = "Загрузка приостановлена";
-            pauseButton.textContent = "Продолжить";
-        } else {
-            resumable.upload();
-            statusElement.textContent = "Загрузка...";
-            pauseButton.textContent = "Пауза";
-        }
-    });
-
-    resumable.on("fileSuccess", function(file, message) {
-        progressElement.style.width = "100%";
-        statusElement.textContent = "Файл успешно загружен!";
-        uploadButton.disabled = true;
-        pauseButton.disabled = true;
-    });
-
-    resumable.on("fileError", function(file, message) {
-        statusElement.textContent =
-            `Ошибка загрузки: ${message}`;
-    });
-
-    resumable.on("fileProgress", function(file) {
-        const progress = file.progress() * 100;
-
-        uploadButton.disabled = true;
-        progressElement.style.width = `${progress}%`;
-        statusElement.textContent =
-            `Загружено: ${progress.toFixed(1)}%`;
-
-        if (progress === 100) {
-            window.location.href = "{{ url_for('files.files_page') }}";
-        }
-    });
+resumable.on("fileProgress", function(file) {
+    const progress = file.progress() * 100;
+    progressEl.style.width = progress + "%";
+    progressLabel.textContent = progress.toFixed(0) + "%";
+    setStatus("Загружено: " + progress.toFixed(1) + "%");
+});
 </script>
 {% endblock %}

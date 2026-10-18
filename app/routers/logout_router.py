@@ -1,5 +1,5 @@
 from quart import Blueprint, redirect, url_for
-from quart_auth import logout_user, login_required
+from quart_auth import login_required, logout_user
 
 logout_router = Blueprint("logout", __name__)
 

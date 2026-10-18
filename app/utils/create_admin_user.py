@@ -1,8 +1,8 @@
 from password_generator import PasswordGenerator
 
 from app.db.session import get_db
-from app.services.users_service import UsersService
 from app.models.user_model import UserModel
+from app.services.users_service import UsersService
 
 
 async def create_admin_user():

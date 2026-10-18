@@ -22,8 +22,8 @@ class FilesService:
         return FileModel.from_entity(file)
 
     async def create_file(
-            self,
-            file: FileModel,
+        self,
+        file: FileModel,
     ) -> FileModel:
         file_entity = file.to_entity()
 

@@ -48,9 +48,9 @@ class UsersService:
         return UserModel.from_entity(new_user)
 
     async def check_login(
-            self,
-            username: str,
-            password: str,
+        self,
+        username: str,
+        password: str,
     ) -> UserModel | None:
         user = await self.users_repository.get_by_username(username)
 
