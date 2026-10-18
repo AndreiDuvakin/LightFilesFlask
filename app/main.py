@@ -2,6 +2,7 @@ import asyncio
 from datetime import timedelta
 from pathlib import Path
 
+from hypercorn.middleware import ProxyFixMiddleware
 from quart import Quart
 from quart_auth import QuartAuth
 from quart_wtf import CSRFProtect
@@ -34,6 +35,12 @@ async def main():
 
     csrf = CSRFProtect()
     csrf.init_app(app)
+
+    app.asgi_app = ProxyFixMiddleware(
+        app.asgi_app,
+        mode="legacy",
+        trusted_hops=1,
+    )
 
     await init_db()
     await create_admin_user()
